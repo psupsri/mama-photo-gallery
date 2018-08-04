@@ -3,7 +3,7 @@
     <v-flex>
       <v-card>
         <v-card-actions class="pa-2">
-          <!-- <v-btn-toggle v-model="sorting">
+          <v-btn-toggle v-model="sorting">
             <v-tooltip top>
               <v-btn flat color="primary" slot="activator">
                 <v-icon>format_list_numbered</v-icon>
@@ -16,7 +16,7 @@
               </v-btn>
               <span>Trending</span>
             </v-tooltip>
-          </v-btn-toggle> -->
+          </v-btn-toggle>
           <v-spacer></v-spacer>
           <div>
             <v-btn color="success" @click.stop="toggleUploadDialog">
@@ -29,7 +29,10 @@
           <gallery></gallery>
         </v-card-title>
       </v-card>
-      <upload-dialog :open="uploadDialog" @close="toggleUploadDialog" v-if="uploadDialog"></upload-dialog>
+      <upload-dialog :open="uploadDialog"
+        @close="toggleUploadDialog"
+        v-if="uploadDialog"
+      ></upload-dialog>
     </v-flex>
   </v-layout>
 </template>

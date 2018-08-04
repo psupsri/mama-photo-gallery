@@ -5,47 +5,51 @@
     persistent
     max-width="300"
   >
-  
     <v-card>
       <v-card-title>
         <input
           type="file"
           ref="file"
           v-show="false"
-          @change="onPhotoPicked">
+          @change="onPhotoPicked"
+        >
         <img
           src="@/assets/upload_photo.png"
           class="cover"
           @click="pickPhoto"
-          v-if="photo.url === ''">
-        <img :src="photo.url" class="cover" v-if="photo.url !== ''" @click="pickPhoto"/>
+          v-if="photo.url === ''"
+        >
+        <img :src="photo.url"
+          class="cover" v-if="photo.url !== ''"
+          @click="pickPhoto"
+        >
         <v-progress-linear
           v-model="progress"
           color="success"
           height="10"
-          v-if="photo.url !== ''"></v-progress-linear>
+          v-if="photo.url !== ''"
+        ></v-progress-linear>
       </v-card-title>
-
       <v-card-actions>
         <v-btn
           color="primary"
           @click="pickPhoto"
           v-if="photo.url !== ''"
           :flat="progress === 100 ? true : false"
-          >find new
+        >find new
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
           color="success"
           @click="upload"
           v-if="photo.url !== '' && progress !== 100"
-          >upload</v-btn>
+        >upload</v-btn>
         <v-spacer></v-spacer>
         <v-btn
           color="error"
           :flat="progress === 100 ? false : true"
           @click="close"
-          >Close</v-btn>
+        >Close</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -78,18 +82,13 @@ export default {
     },
     onPhotoPicked (e) {
       this.progress = 0
-
       const files = e.target.files
       if (files[0] === undefined) return
-
       this.photo.name = files[0].name
-
       if (this.photo.name.lastIndexOf('.') <= 0) {
         return
       }
-
       const fr = new FileReader()
-
       fr.readAsDataURL(files[0])
       fr.addEventListener('load', () => {
         this.photo.url = fr.result
