@@ -18,6 +18,18 @@ const config = {
 
 firebase.initializeApp(config)
 
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((x) => x.meta.requiresAuth)) {
+    if (firebase.auth().currentUser) {
+      next()
+      return
+    }
+    next({ path: '/', query: { redirect: to.fullPath } })
+    return
+  }
+  next()
+})
+
 Vue.use(Vuetify)
 
 Vue.config.productionTip = false
