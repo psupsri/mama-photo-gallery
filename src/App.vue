@@ -7,8 +7,7 @@
       <v-container fill-height>
         <v-layout>
           <v-flex>
-            <toolbar :title="title" 
-              :items="menu"
+            <toolbar :title="title"
             ></toolbar>
             <v-divider></v-divider>
             <v-container fill-height>
@@ -29,12 +28,7 @@ export default {
     Toolbar
   },
   data: () => ({
-    title: 'Mama-photos',
-    menu: [
-      { 'title': 'Home', 'link': '/' }
-      // ,
-      // { 'title': 'My Album', 'link': '/myalbum' }
-    ]
+    title: 'Mama-photos'
   })
 }
 </script>

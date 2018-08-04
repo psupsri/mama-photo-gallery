@@ -3,15 +3,54 @@
     <v-toolbar-title v-text="title"></v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items class="hidden-sm-and-down">
-      <v-btn flat v-for="(item, i) in items" :key="i"
-        :to="item.link"
-      >{{ item.title }}</v-btn>
+      <v-btn flat
+        to="/"
+      >home</v-btn>
+      <v-btn flat
+        v-if="currentUser"
+        :to="`/myalbum/${currentUser.uid}`"
+      >my album</v-btn>
+      <v-btn
+        flat color="info"
+        @click="signIn"
+        v-if="!currentUser"
+      >
+        sign in
+      </v-btn>
+      <v-btn
+        flat color="error"
+        @click="signOut"
+        v-else
+      >
+        sign out
+      </v-btn>
     </v-toolbar-items>
   </v-toolbar>
 </template>
 
 <script>
+import firebase from 'firebase'
+
 export default {
-  props: ['items', 'title']
+  props: ['title'],
+  data: () => ({
+    currentUser: null
+  }),
+  created () {
+    firebase.auth().onAuthStateChanged((user) => {
+      this.currentUser = user
+    })
+  },
+  methods: {
+    signIn () {
+      firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .then((res) => {
+          console.log(res)
+        })
+    },
+    signOut () {
+      firebase.auth().signOut()
+    }
+  }
 }
 </script>
