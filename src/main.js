@@ -7,6 +7,7 @@ import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import firebase from 'firebase'
 
+let app
 const config = {
   apiKey: 'AIzaSyAmhvtyJukfzpEwobwLhpabnm7dFFnydMM',
   authDomain: 'mama-photo-gallery.firebaseapp.com',
@@ -34,9 +35,18 @@ Vue.use(Vuetify)
 
 Vue.config.productionTip = false
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  ...App
+firebase.auth().onAuthStateChanged((user) => {
+  if (!app) {
+    /* eslint-disable no-new */
+    app = new Vue({
+      el: '#app',
+      router,
+      ...App,
+      created () {
+        firebase.auth().onAuthStateChanged((user) => {
+          console.log(user)
+        })
+      }
+    })
+  }
 })
