@@ -1,34 +1,7 @@
 <template>
   <v-layout>
     <v-flex>
-      <v-card>
-        <v-card-actions class="pa-2">
-          <v-btn-toggle v-model="sorting">
-            <v-tooltip top>
-              <v-btn flat color="primary" slot="activator">
-                <v-icon>format_list_numbered</v-icon>
-              </v-btn>
-              <span>New</span>
-            </v-tooltip>
-            <v-tooltip top>
-              <v-btn flat color="red" slot="activator">
-                <v-icon>favorite</v-icon>
-              </v-btn>
-              <span>Trending</span>
-            </v-tooltip>
-          </v-btn-toggle>
-          <v-spacer></v-spacer>
-          <div>
-            <v-btn color="success" @click.stop="toggleUploadDialog">
-              <v-icon>add_photo_alternate</v-icon>
-              &nbsp;Upload New
-            </v-btn>
-          </div>
-        </v-card-actions>
-        <v-card-title class="pa-2">
-          <gallery></gallery>
-        </v-card-title>
-      </v-card>
+      <gallery :photos="photos"></gallery>
       <upload-dialog :open="uploadDialog"
         @close="toggleUploadDialog"
         v-if="uploadDialog"
@@ -38,8 +11,11 @@
 </template>
 
 <script>
+import firebase from 'firebase'
+
 import Gallery from '@/components/Gallery'
 import UploadDialog from '@/components/UploadDialog'
+
 export default {
   components: {
     Gallery,
@@ -47,25 +23,30 @@ export default {
   },
   data: () => ({
     filter: 'all',
-    sorting: 0,
-    recent_sorting: 0,
-    uploadDialog: false
+    uploadDialog: false,
+    photos: []
   }),
-  watch: {
-    sorting () {
-      if (this.sorting !== null) {
-        this.recent_sorting = this.sorting
-      } else {
-        this.sorting = this.recent_sorting
-      }
-    }
+  created () {
+    this.getPhotos()
   },
   methods: {
-    toggleFilter (v) {
-      this.filter = v
-    },
     toggleUploadDialog () {
       (this.uploadDialog) ? this.uploadDialog = false : this.uploadDialog = true
+    },
+    getPhotos () {
+      firebase.database().ref('photos')
+        .on('value', (snapshot) => {
+          let result = []
+          snapshot.forEach((childSnapshot) => {
+            // key will be "ada" the first time and "alan" the second time
+            let key = childSnapshot.key
+            // childData will be the actual contents of the child
+            let data = childSnapshot.val()
+            data._id = key
+            result.push(data)
+          })
+          this.photos = result
+        })
     }
   }
 }
