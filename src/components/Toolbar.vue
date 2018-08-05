@@ -44,12 +44,13 @@ export default {
   methods: {
     signIn () {
       firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-        .then((res) => {
-          console.log(res)
+        .then(() => {
+          this.$router.push('/')
         })
     },
     signOut () {
       firebase.auth().signOut()
+      this.$router.push('/')
     }
   }
 }
