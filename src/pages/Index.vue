@@ -2,10 +2,6 @@
   <v-layout>
     <v-flex>
       <gallery :photos="photos"></gallery>
-      <upload-dialog :open="uploadDialog"
-        @close="toggleUploadDialog"
-        v-if="uploadDialog"
-      ></upload-dialog>
     </v-flex>
   </v-layout>
 </template>
@@ -14,16 +10,13 @@
 import firebase from 'firebase'
 
 import Gallery from '@/components/Gallery'
-import UploadDialog from '@/components/UploadDialog'
 
 export default {
   components: {
-    Gallery,
-    UploadDialog
+    Gallery
   },
   data: () => ({
     filter: 'all',
-    uploadDialog: false,
     photos: []
   }),
   created () {

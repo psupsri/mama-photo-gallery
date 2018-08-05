@@ -2,10 +2,6 @@
   <v-layout>
     <v-flex>
       <gallery :photos="photos"></gallery>
-      <upload-dialog :open="uploadDialog"
-        @close="toggleUploadDialog"
-        v-if="uploadDialog"
-      ></upload-dialog>
     </v-flex>
   </v-layout>
 </template>
@@ -13,17 +9,14 @@
 <script>
 import firebase from 'firebase'
 import Gallery from '@/components/Gallery'
-import UploadDialog from '@/components/UploadDialog'
 
 export default {
   components: {
-    Gallery,
-    UploadDialog
+    Gallery
   },
   data: () => ({
     id: null,
-    photos: [],
-    uploadDialog: false
+    photos: []
   }),
   watch: {
     $route () {
@@ -38,15 +31,21 @@ export default {
       this.id = this.$route.params.id
       this.getPhotos()
     },
-    toggleUploadDialog () {
-      (this.uploadDialog) ? this.uploadDialog = false : this.uploadDialog = true
-    },
     getPhotos () {
       firebase.database().ref('photos')
         .orderByChild('owner')
         .equalTo(this.id)
         .on('value', (snapshot) => {
-          this.photos = snapshot.val()
+          let result = []
+          snapshot.forEach((childSnapshot) => {
+            // key will be "ada" the first time and "alan" the second time
+            let key = childSnapshot.key
+            // childData will be the actual contents of the child
+            let data = childSnapshot.val()
+            data._id = key
+            result.push(data)
+          })
+          this.photos = result
         })
     }
   }

@@ -30,7 +30,6 @@
           v-for="(photo, index) in photos"
           :key="index"
           xs3
-          @click="click(photo._id)"
         >
           <v-card flat tile
             class="card"
@@ -38,14 +37,15 @@
             <v-card-media
               :src="photo.url"
               height="190px"
-              
             >
+            <!-- @click="selectPhoto(photo._id)" -->
             </v-card-media>
             <div class="option fadein">
               <div class="top-right">
                 <v-btn icon
                   color="white"
                   :ripple="false"
+                  @click="clickLike(photo._id, photo.like)"
                 >
                   <v-icon color="red accent-2">favorite_border</v-icon>
                 </v-btn>
@@ -56,7 +56,9 @@
                 </v-btn>
               </div>
               <div class="bottom-right">
-                <v-btn depressed>
+                <v-btn depressed
+                  @click="selectPhoto(photo._id)"
+                >
                   <v-icon>input</v-icon>
                   view
                 </v-btn>
@@ -67,15 +69,27 @@
       </v-layout>
     </v-container>
   </v-card-title>
+  <upload-dialog :open="uploadDialog"
+    @close="toggleUploadDialog"
+    v-if="uploadDialog"
+  ></upload-dialog>
 </v-card>
 </template>
 
 <script>
+import firebase from 'firebase'
+
+import UploadDialog from '@/components/UploadDialog'
+
 export default {
   props: ['photos'],
+  components: {
+    UploadDialog
+  },
   data: () => ({
     sorting: 0,
-    recent_sorting: 0
+    recent_sorting: 0,
+    uploadDialog: false
   }),
   watch: {
     sorting () {
@@ -87,11 +101,21 @@ export default {
     }
   },
   methods: {
-    click (v) {
-      console.log(v)
+    selectPhoto (id) {
+      this.$router.push(`/photo/${id}`)
     },
     toggleFilter (v) {
       this.filter = v
+    },
+    toggleUploadDialog () {
+      (this.uploadDialog) ? this.uploadDialog = false : this.uploadDialog = true
+    },
+    clickLike (id, value) {
+      firebase.database()
+        .ref(`photos/${id}`)
+        .update({
+          like: value + 1
+        })
     }
   }
 }

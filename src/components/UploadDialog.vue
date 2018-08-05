@@ -111,7 +111,8 @@ export default {
             .set({
               name: this.photo.name,
               url: downloadURL,
-              owner: this.currentUser.uid
+              owner: this.currentUser.uid,
+              like: 0
             })
           this.uploading = false
         })
