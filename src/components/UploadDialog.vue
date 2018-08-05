@@ -68,10 +68,11 @@ export default {
       file: ''
     },
     uploading: false,
-    progress: 0
+    progress: 0,
+    currentUser: null
   }),
   created () {
-    console.log('created')
+    this.currentUser = firebase.auth().currentUser
   },
   methods: {
     close () {
@@ -109,7 +110,8 @@ export default {
           firebase.database().ref(`photos/${key}`)
             .set({
               name: this.photo.name,
-              url: downloadURL
+              url: downloadURL,
+              owner: this.currentUser.uid
             })
           this.uploading = false
         })
