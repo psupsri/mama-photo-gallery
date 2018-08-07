@@ -5,6 +5,8 @@ import App from './App'
 import router from './router'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import store from './store'
+
 import firebase from 'firebase'
 
 let app
@@ -41,6 +43,7 @@ firebase.auth().onAuthStateChanged((user) => {
     app = new Vue({
       el: '#app',
       router,
+      store,
       ...App
     })
   }

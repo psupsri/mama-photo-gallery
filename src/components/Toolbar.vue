@@ -10,6 +10,10 @@
         v-if="currentUser"
         :to="`/myalbum/${currentUser.uid}`"
       >my album</v-btn>
+      <v-btn flat
+        v-if="currentUser"
+        :to="`/profile/${currentUser.uid}`"
+      >my profile</v-btn>
       <v-btn
         flat color="info"
         @click="signIn"

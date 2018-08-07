@@ -29,6 +29,9 @@ export default {
   },
   data: () => ({
     title: 'Mama-photos'
-  })
+  }),
+  created () {
+    this.$store.dispatch('getphotosfromdatabase')
+  }
 }
 </script>

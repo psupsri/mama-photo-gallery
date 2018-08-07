@@ -16,7 +16,7 @@
       </v-tooltip>
     </v-btn-toggle>
     <v-spacer></v-spacer>
-    <div>
+    <div v-if="currentUser">
       <v-btn color="success" @click.stop="toggleUploadDialog">
         <v-icon>add_photo_alternate</v-icon>
         &nbsp;Upload New
@@ -45,9 +45,16 @@
                 <v-btn icon
                   color="white"
                   :ripple="false"
+                  v-if="currentUser"
                   @click="clickLike(photo._id, photo.like)"
                 >
-                  <v-icon color="red accent-2">favorite_border</v-icon>
+                  <v-icon color="red accent-2"
+                    v-if="options && options.photos[photo._id]
+                      && options.photos[photo._id].like === true"
+                  >favorite</v-icon>
+                  <v-icon color="red accent-2"
+                    v-else
+                  >favorite_border</v-icon>
                 </v-btn>
                 <v-btn icon
                   color="info"
@@ -62,6 +69,7 @@
                   <v-icon>input</v-icon>
                   view
                 </v-btn>
+                
               </div>
             </div>
           </v-card>
@@ -69,6 +77,7 @@
       </v-layout>
     </v-container>
   </v-card-title>
+  
   <upload-dialog :open="uploadDialog"
     @close="toggleUploadDialog"
     v-if="uploadDialog"
@@ -78,6 +87,7 @@
 
 <script>
 import firebase from 'firebase'
+import { Photos } from '@/services'
 
 import UploadDialog from '@/components/UploadDialog'
 
@@ -87,9 +97,12 @@ export default {
     UploadDialog
   },
   data: () => ({
+    currentUser: null,
     sorting: 0,
     recent_sorting: 0,
-    uploadDialog: false
+    uploadDialog: false,
+    like: false,
+    options: []
   }),
   watch: {
     sorting () {
@@ -100,7 +113,20 @@ export default {
       }
     }
   },
+  created () {
+    this.reload()
+    this.loadUser()
+    this.getOptions(this.currentUser.uid)
+  },
   methods: {
+    reload () {
+      firebase.auth().onAuthStateChanged((user) => {
+        this.currentUser = user
+      })
+    },
+    loadUser () {
+      this.currentUser = firebase.auth().currentUser
+    },
     selectPhoto (id) {
       this.$router.push(`/photo/${id}`)
     },
@@ -111,11 +137,35 @@ export default {
       (this.uploadDialog) ? this.uploadDialog = false : this.uploadDialog = true
     },
     clickLike (id, value) {
-      firebase.database()
-        .ref(`photos/${id}`)
-        .update({
+      if (this.options.photos[id]) {
+        if (this.options.photos[id].like === true) {
+          Photos.update(`photos/${id}`, {
+            like: value - 1
+          })
+          Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
+            like: false
+          })
+        } else {
+          Photos.update(`photos/${id}`, {
+            like: value + 1
+          })
+          Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
+            like: true
+          })
+        }
+      } else {
+        Photos.update(`photos/${id}`, {
           like: value + 1
         })
+        Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
+          like: true
+        })
+      }
+    },
+    getOptions (id) {
+      Photos.getOptions(id, (res) => {
+        this.options = res
+      })
     }
   }
 }

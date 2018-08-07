@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import firebase from 'firebase'
+import { Photos, Users } from '@/services'
 
 export default {
   props: ['open'],
@@ -72,7 +72,7 @@ export default {
     currentUser: null
   }),
   created () {
-    this.currentUser = firebase.auth().currentUser
+    this.currentUser = Users.getCurrentUser()
   },
   methods: {
     close () {
@@ -99,21 +99,20 @@ export default {
     upload () {
       if (!this.photo.file) return
       const key = Date.now()
-      const task = firebase.storage().ref(`files/${key}`).put(this.photo.file)
       this.uploading = true
+      const task = Photos.put(key, this.photo.file)
       task.on('state_changed', (snapshot) => {
         this.progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
       }, (error) => {
         console.log(error)
       }, () => {
         task.snapshot.ref.getDownloadURL().then((downloadURL) => {
-          firebase.database().ref(`photos/${key}`)
-            .set({
-              name: this.photo.name,
-              url: downloadURL,
-              owner: this.currentUser.uid,
-              like: 0
-            })
+          Photos.set(`photos/${key}`, {
+            name: this.photo.name,
+            url: downloadURL,
+            owner: this.currentUser.uid,
+            like: 0
+          })
           this.uploading = false
         })
       })
