@@ -51,19 +51,18 @@ export default {
       firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
         .then((res) => {
           const user = res.user
-          firebase.database().ref(`users/${user.uid}`)
-            .once('value', (snapshot) => {
-              if (!snapshot.val()) {
-                Users.set(user.uid, {
-                  name: user.displayName,
-                  email: user.email,
-                  photo: user.photoURL,
-                  role: {
-                    admin: false
-                  }
-                })
-              }
-            })
+          Users.getById(user.uid, (snapshot) => {
+            if (!snapshot.val()) {
+              Users.set(user.uid, {
+                displayName: user.displayName,
+                email: user.email,
+                photo: user.photoURL,
+                role: {
+                  admin: false
+                }
+              })
+            }
+          })
           this.$router.push('/')
         })
     },

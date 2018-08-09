@@ -1,6 +1,6 @@
 import firebase from 'firebase'
 
-const put = (key, file) => firebase.storage().ref(`files/${key}`).put(file)
+const put = (url, file) => firebase.storage().ref(url).put(file)
 
 const get = (callback) => {
   firebase.database().ref('photos')
@@ -13,6 +13,13 @@ const get = (callback) => {
         result.push(data)
       })
       callback(result)
+    })
+}
+
+const getById = (id, callback) => {
+  firebase.database().ref(`photos/${id}`)
+    .on('value', (snapshot) => {
+      callback(snapshot)
     })
 }
 
@@ -36,10 +43,28 @@ const getOptions = (id, callback) => {
     })
 }
 
+const getByOwner = (id, callback) => {
+  firebase.database()
+    .ref('photos')
+    .orderByChild('owner')
+    .equalTo(id)
+    .on('value', (snapshots) => {
+      let result = []
+      snapshots.forEach((snapshot) => {
+        let key = snapshot.key
+        let data = snapshot.val()
+        data._id = key
+        result.push(data)
+      })
+      callback(result)
+    })
+}
 export default {
   get,
   set,
   put,
   update,
-  getOptions
+  getOptions,
+  getByOwner,
+  getById
 }

@@ -10,7 +10,7 @@
             <toolbar :title="title"
             ></toolbar>
             <v-divider></v-divider>
-            <v-container fill-height>
+            <v-container fill-height grid-list-md text-xs-center>
               <router-view></router-view>
             </v-container>
           </v-flex>

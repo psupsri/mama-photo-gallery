@@ -24,7 +24,7 @@
           @click="pickPhoto"
         >
         <v-progress-linear
-          v-model="progress"
+          :value="progress"
           color="success"
           height="10"
           v-if="photo.url !== ''"
@@ -57,23 +57,15 @@
 </template>
 
 <script>
-import { Photos, Users } from '@/services'
-
 export default {
-  props: ['open'],
+  props: ['open', 'uploading', 'progress'],
   data: () => ({
     photo: {
       name: '',
       url: '',
       file: ''
-    },
-    uploading: false,
-    progress: 0,
-    currentUser: null
+    }
   }),
-  created () {
-    this.currentUser = Users.getCurrentUser()
-  },
   methods: {
     close () {
       this.$emit('close')
@@ -97,25 +89,7 @@ export default {
       })
     },
     upload () {
-      if (!this.photo.file) return
-      const key = Date.now()
-      this.uploading = true
-      const task = Photos.put(key, this.photo.file)
-      task.on('state_changed', (snapshot) => {
-        this.progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-      }, (error) => {
-        console.log(error)
-      }, () => {
-        task.snapshot.ref.getDownloadURL().then((downloadURL) => {
-          Photos.set(`photos/${key}`, {
-            name: this.photo.name,
-            url: downloadURL,
-            owner: this.currentUser.uid,
-            like: 0
-          })
-          this.uploading = false
-        })
-      })
+      this.$emit('upload', this.photo)
     }
   }
 }

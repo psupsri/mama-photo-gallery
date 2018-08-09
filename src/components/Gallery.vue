@@ -49,7 +49,8 @@
                   @click="clickLike(photo._id, photo.like)"
                 >
                   <v-icon color="red accent-2"
-                    v-if="options && options.photos[photo._id]
+                    v-if="options && options.length !== 0
+                      && photo._id in options.photos
                       && options.photos[photo._id].like === true"
                   >favorite</v-icon>
                   <v-icon color="red accent-2"
@@ -78,8 +79,12 @@
     </v-container>
   </v-card-title>
   
-  <upload-dialog :open="uploadDialog"
+  <upload-dialog
+    :open="uploadDialog"
+    :uploading="uploading"
+    :progress="progress"
     @close="toggleUploadDialog"
+    @upload="upload"
     v-if="uploadDialog"
   ></upload-dialog>
 </v-card>
@@ -87,7 +92,7 @@
 
 <script>
 import firebase from 'firebase'
-import { Photos } from '@/services'
+import { Photos, Users } from '@/services'
 
 import UploadDialog from '@/components/UploadDialog'
 
@@ -102,7 +107,9 @@ export default {
     recent_sorting: 0,
     uploadDialog: false,
     like: false,
-    options: []
+    options: [],
+    progress: 0,
+    uploading: false
   }),
   watch: {
     sorting () {
@@ -116,7 +123,7 @@ export default {
   created () {
     this.reload()
     this.loadUser()
-    this.getOptions(this.currentUser.uid)
+    this.getOptions()
   },
   methods: {
     reload () {
@@ -126,6 +133,8 @@ export default {
     },
     loadUser () {
       this.currentUser = firebase.auth().currentUser
+      // if (!this.currentUser) return
+      // this.getOptions(this.currentUser.uid)
     },
     selectPhoto (id) {
       this.$router.push(`/photo/${id}`)
@@ -137,34 +146,69 @@ export default {
       (this.uploadDialog) ? this.uploadDialog = false : this.uploadDialog = true
     },
     clickLike (id, value) {
-      if (this.options.photos[id]) {
-        if (this.options.photos[id].like === true) {
-          Photos.update(`photos/${id}`, {
-            like: value - 1
-          })
-          Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
-            like: false
-          })
-        } else {
-          Photos.update(`photos/${id}`, {
-            like: value + 1
-          })
-          Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
-            like: true
-          })
-        }
+      if (!this.options || this.options.length === 0) {
+        console.log('1')
+        this.likePhoto(id, value)
       } else {
-        Photos.update(`photos/${id}`, {
-          like: value + 1
-        })
-        Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
-          like: true
-        })
+        if (id in this.options.photos) {
+          console.log('2')
+          if (this.options.photos[id].like === true) {
+            console.log('4')
+            this.unlikePhoto(id, value)
+          } else {
+            console.log('5')
+            this.likePhoto(id, value)
+          }
+        } else {
+          console.log('3')
+          this.likePhoto(id, value)
+        }
       }
     },
-    getOptions (id) {
+    likePhoto (id, value) {
+      Photos.update(`photos/${id}`, {
+        like: value + 1
+      })
+      Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
+        like: true
+      })
+    },
+    unlikePhoto (id, value) {
+      Photos.update(`photos/${id}`, {
+        like: value - 1
+      })
+      Photos.update(`options/${this.currentUser.uid}/photos/${id}`, {
+        like: false
+      })
+    },
+    getOptions () {
+      if (!Users.getCurrentUser()) return
+      const id = Users.getCurrentUser().uid
       Photos.getOptions(id, (res) => {
         this.options = res
+      })
+    },
+    upload (value) {
+      if (!value.file) return
+      const key = Date.now()
+      const id = Users.getCurrentUser().uid
+      this.uploading = true
+      const task = Photos.put(`files/user/${id}/photos/${key}`, value.file)
+      task.on('state_changed', (snapshot) => {
+        this.progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+      }, (error) => {
+        console.log(error)
+      }, () => {
+        task.snapshot.ref.getDownloadURL().then((downloadURL) => {
+          Photos.set(`photos/${key}`, {
+            name: value.name,
+            url: downloadURL,
+            owner: id,
+            like: 0,
+            downloaded: 0
+          })
+          this.uploading = false
+        })
       })
     }
   }
