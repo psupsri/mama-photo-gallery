@@ -29,7 +29,9 @@
         <v-flex
           v-for="(photo, index) in photos"
           :key="index"
-          xs3
+          xs12
+          sm6
+          md3
         >
           <v-card flat tile
             class="card"
@@ -40,7 +42,7 @@
             >
             <!-- @click="selectPhoto(photo._id)" -->
             </v-card-media>
-            <div class="option fadein">
+            <div class="option fadein hidden-sm-and-down">
               <div class="top-right">
                 <v-btn icon
                   color="white"
@@ -70,9 +72,38 @@
                   <v-icon>input</v-icon>
                   view
                 </v-btn>
-                
               </div>
             </div>
+            <v-card-actions class="hidden-md-and-up">
+              <v-btn icon
+                color="white"
+                :ripple="false"
+                v-if="currentUser"
+                @click="clickLike(photo._id, photo.like)"
+              >
+                <v-icon color="red accent-2"
+                  v-if="options && options.length !== 0
+                    && photo._id in options.photos
+                    && options.photos[photo._id].like === true"
+                >favorite</v-icon>
+                <v-icon color="red accent-2"
+                  v-else
+                >favorite_border</v-icon>
+              </v-btn>
+              <v-btn icon
+                color="info"
+                outline
+              >
+                <v-icon>share</v-icon>
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn depressed
+                @click="selectPhoto(photo._id)"
+              >
+                <v-icon>input</v-icon>
+                view
+              </v-btn>
+            </v-card-actions>
           </v-card>
         </v-flex>
       </v-layout>

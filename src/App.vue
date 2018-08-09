@@ -7,7 +7,8 @@
       <v-container fill-height>
         <v-layout>
           <v-flex>
-            <toolbar :title="title"
+            <toolbar 
+              :title="title"
             ></toolbar>
             <v-divider></v-divider>
             <v-container fill-height grid-list-md text-xs-center>
@@ -15,6 +16,7 @@
             </v-container>
           </v-flex>
         </v-layout>
+        
       </v-container>
     </v-jumbotron>
   </v-app>
@@ -28,7 +30,8 @@ export default {
     Toolbar
   },
   data: () => ({
-    title: 'Mama-photos'
+    title: 'Mama-photos',
+    sideMenu: false
   }),
   created () {
     this.$store.dispatch('getphotosfromdatabase')
