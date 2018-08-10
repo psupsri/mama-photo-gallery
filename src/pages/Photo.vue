@@ -1,9 +1,7 @@
 <template>
   <v-layout row wrap>
     <v-flex
-      xs12
-      sm6
-      md4
+      xs12 sm6 md4
       text-xs-center
     >
       <v-card>
@@ -11,25 +9,38 @@
           :src="photo.url"
           :height="300"
         ></v-card-media>
+        <v-card-title>
+        </v-card-title>
         <v-card-actions>
           <v-btn
             v-if="currentUser"
             color="success"
             @click="download"
           >download</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn icon
+            color="white"
+            :ripple="false"
+            v-if="currentUser"
+            @click="clickLike(photo._id, photo.like)"
+          >
+            <v-icon color="red accent-2"
+              v-if="options && options.length !== 0
+                && id in options.photos
+                && options.photos[id].like === true"
+            >favorite</v-icon>
+            <v-icon color="red accent-2"
+              v-else
+            >favorite_border</v-icon>
+          </v-btn>
+          <v-btn
+            icon
+            outline
+            color="info">
+            <v-icon>share</v-icon>
+          </v-btn>
         </v-card-actions>
       </v-card>
-    </v-flex>
-    <v-flex>
-      <v-avatar
-        :tile="false"
-        :size="150"
-        color="grey lighten-4"
-        v-if="owner"
-      >
-        <img :src="owner.photo" alt="avatar">
-      </v-avatar>
-      {{ owner.displayName }}
     </v-flex>
   </v-layout>
 </template>
@@ -42,17 +53,23 @@ export default {
     id: null,
     photo: {},
     owner: {},
-    currentUser: null
+    currentUser: null,
+    options: []
   }),
   watch: {
     $route () {
       this.reload()
+    },
+    id () {
+      this.loadPhotoData()
+    },
+    photo () {
+      this.loadOwnerData()
+      this.getOptions()
     }
   },
   created () {
     this.reload()
-    this.loadPhotoData()
-    this.loadOwnerData()
   },
   methods: {
     reload () {
@@ -72,6 +89,13 @@ export default {
     download () {
       Photos.update(`photos/${this.id}`, {
         downloaded: this.photo.downloaded + 1
+      })
+    },
+    getOptions () {
+      if (!Users.getCurrentUser()) return
+      const id = Users.getCurrentUser().uid
+      Photos.getOptions(id, (res) => {
+        this.options = res
       })
     }
   }
