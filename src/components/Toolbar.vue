@@ -2,7 +2,6 @@
   <v-toolbar flat color="transparent" dense>
     <v-toolbar-title
       v-text="title"
-      class="hidden-xs-only"
     ></v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items class="hidden-sm-and-down">
