@@ -20,7 +20,7 @@ const actions = {
 }
 
 const getters = {
-  getPhotos: state => state.photos,
+  getPhotos: state => _.orderBy(state.photos, ['_createdAt'], ['desc']),
   getPhotosByOwner: state => _.filter(state.photos, { 'owner': Users.getCurrentUser().uid })
 }
 

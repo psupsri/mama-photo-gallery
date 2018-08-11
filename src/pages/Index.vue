@@ -1,7 +1,7 @@
 <template>
   <v-layout>
     <v-flex>
-      <gallery :photos="getPhotos"></gallery>
+      <gallery :items="getPhotos"></gallery>
     </v-flex>
   </v-layout>
 </template>

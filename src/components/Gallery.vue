@@ -1,20 +1,11 @@
 <template>
 <v-card>
   <v-card-actions class="pa-2">
-    <v-btn-toggle v-model="sorting">
-      <v-tooltip top>
-        <v-btn flat color="primary" slot="activator">
-          <v-icon>format_list_numbered</v-icon>
-        </v-btn>
-        <span>New</span>
-      </v-tooltip>
-      <v-tooltip top>
-        <v-btn flat color="red" slot="activator">
-          <v-icon>favorite</v-icon>
-        </v-btn>
-        <span>Trending</span>
-      </v-tooltip>
-    </v-btn-toggle>
+    <sorting-button
+      :value="sorting"
+      :items="sortingItems"
+      @sortingFilter="sortingFilter"
+    ></sorting-button>
     <v-spacer></v-spacer>
     <div v-if="currentUser">
       <v-btn color="success" @click.stop="toggleUploadDialog">
@@ -29,9 +20,7 @@
         <v-flex
           v-for="(photo, index) in photos"
           :key="index"
-          xs12
-          sm6
-          md3
+          xs12 sm6 md3
         >
           <v-card flat tile
             class="card"
@@ -123,38 +112,57 @@
 
 <script>
 import firebase from 'firebase'
+import _ from 'lodash'
 import { Photos, Users } from '@/services'
 
+import SortingButton from '@/components/SortingButton'
 import UploadDialog from '@/components/UploadDialog'
 
 export default {
-  props: ['photos'],
+  props: ['items'],
   components: {
-    UploadDialog
+    UploadDialog,
+    SortingButton
   },
   data: () => ({
     currentUser: null,
     sorting: 0,
-    recent_sorting: 0,
+    sortingItems: [
+      {
+        title: 'New',
+        color: 'primary',
+        icon: 'format_list_numbered'
+      },
+      {
+        title: 'Trending',
+        color: 'red',
+        icon: 'favorite'
+      }
+    ],
     uploadDialog: false,
     like: false,
+    photos: [],
     options: [],
     progress: 0,
     uploading: false
   }),
-  watch: {
-    sorting () {
-      if (this.sorting !== null) {
-        this.recent_sorting = this.sorting
-      } else {
-        this.sorting = this.recent_sorting
-      }
-    }
-  },
   created () {
     this.reload()
-    this.loadUser()
-    this.getOptions()
+  },
+  watch: {
+    currentUser () {
+      this.getOptions()
+    },
+    sorting () {
+      if (this.sorting === 0) {
+        this.photos = this.items
+      } else {
+        this.photos = _.orderBy(this.items, ['like'], ['desc'])
+      }
+    },
+    items () {
+      this.photos = this.items
+    }
   },
   methods: {
     reload () {
@@ -162,16 +170,11 @@ export default {
         this.currentUser = user
       })
     },
-    loadUser () {
-      this.currentUser = firebase.auth().currentUser
-      // if (!this.currentUser) return
-      // this.getOptions(this.currentUser.uid)
-    },
     selectPhoto (id) {
       this.$router.push(`/photo/${id}`)
     },
-    toggleFilter (v) {
-      this.filter = v
+    sortingFilter (v) {
+      this.sorting = v
     },
     toggleUploadDialog () {
       (this.uploadDialog) ? this.uploadDialog = false : this.uploadDialog = true
@@ -236,7 +239,8 @@ export default {
             url: downloadURL,
             owner: id,
             like: 0,
-            downloaded: 0
+            downloaded: 0,
+            createdAt: key
           })
           this.uploading = false
         })

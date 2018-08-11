@@ -1,7 +1,7 @@
 <template>
   <v-layout>
     <v-flex>
-      <gallery :photos="getPhotosByOwner"></gallery>
+      <gallery :items="getPhotosByOwner"></gallery>
     </v-flex>
   </v-layout>
 </template>
