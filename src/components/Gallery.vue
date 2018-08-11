@@ -161,7 +161,11 @@ export default {
       }
     },
     items () {
-      this.photos = this.items
+      if (this.sorting === 0) {
+        this.photos = this.items
+      } else {
+        this.photos = _.orderBy(this.items, ['like'], ['desc'])
+      }
     }
   },
   methods: {
@@ -181,20 +185,15 @@ export default {
     },
     clickLike (id, value) {
       if (!this.options || this.options.length === 0) {
-        console.log('1')
         this.likePhoto(id, value)
       } else {
         if (id in this.options.photos) {
-          console.log('2')
           if (this.options.photos[id].like === true) {
-            console.log('4')
             this.unlikePhoto(id, value)
           } else {
-            console.log('5')
             this.likePhoto(id, value)
           }
         } else {
-          console.log('3')
           this.likePhoto(id, value)
         }
       }
@@ -240,7 +239,7 @@ export default {
             owner: id,
             like: 0,
             downloaded: 0,
-            createdAt: key
+            _createdAt: key
           })
           this.uploading = false
         })
