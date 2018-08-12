@@ -43,6 +43,14 @@ const getOptions = (id, callback) => {
     })
 }
 
+const getTags = (callback) => {
+  firebase.database()
+    .ref('tags')
+    .on('value', (snapshot) => {
+      callback(snapshot.val())
+    })
+}
+
 const getByOwner = (id, callback) => {
   firebase.database()
     .ref('photos')
@@ -66,5 +74,6 @@ export default {
   update,
   getOptions,
   getByOwner,
-  getById
+  getById,
+  getTags
 }

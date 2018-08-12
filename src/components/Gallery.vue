@@ -15,7 +15,10 @@
     </div>
   </v-card-actions>
   <v-card-actions>
-    <tags :items="tags" @selectTag="selectTag"></tags>
+    <tag
+      :items="tags" @selectTag="selectTag"
+      class="hidden-sm-and-down"
+    ></tag>
   </v-card-actions>
   <v-card-title class="pa-2">
     <v-container grid-list-xs wrap class="pa-0">
@@ -85,6 +88,7 @@
               <v-btn icon
                 color="info"
                 outline
+                @click="sharePhoto(photo.url)"
               >
                 <v-icon>share</v-icon>
               </v-btn>
@@ -129,14 +133,14 @@ import { Photos, Users } from '@/services'
 
 import SortingButton from '@/components/SortingButton'
 import UploadDialog from '@/components/UploadDialog'
-import Tags from '@/components/Tags'
+import Tag from '@/components/Tag'
 
 export default {
   props: ['items'],
   components: {
     UploadDialog,
     SortingButton,
-    Tags
+    Tag
   },
   data: () => ({
     currentUser: null,
@@ -258,14 +262,18 @@ export default {
       })
     },
     getTags () {
-      firebase.database()
-        .ref('tags')
-        .on('value', (snapshot) => {
-          this.tags = snapshot.val()
-        })
+      Photos.getTags((res) => {
+        this.tags = res
+      })
     },
     selectTag (v) {
       this.currentTag = v
+    },
+    sharePhoto (photoUrl) {
+      let u = photoUrl
+      window.open('http://www.facebook.com/sharer.php?u=' + encodeURIComponent(u) +
+        'toolbar=0, status=0, width=626, height=436')
+      return false
     },
     upload (value) {
       if (!value.file) return
@@ -285,6 +293,7 @@ export default {
             owner: id,
             like: 0,
             downloaded: 0,
+            tag: value.tag,
             _createdAt: key
           })
           this.uploading = false

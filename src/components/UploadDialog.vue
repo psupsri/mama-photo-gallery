@@ -23,6 +23,10 @@
           class="cover" v-if="photo.url !== ''"
           @click="pickPhoto"
         >
+        <select-input
+          :items="tags" v-if="photo.url !== ''"
+          @selectItem="selectTag"
+        ></select-input>
         <v-progress-linear
           :value="progress"
           color="success"
@@ -38,11 +42,12 @@
           :flat="progress === 100 ? true : false"
         >find new
         </v-btn>
-        <v-spacer></v-spacer>
         <v-btn
           color="success"
           @click="upload"
-          v-if="photo.url !== '' && progress !== 100"
+          v-if="photo.url !== '' && progress !== 100
+            && photo.tag !== ''
+            "
         >upload</v-btn>
         <v-spacer></v-spacer>
         <v-btn
@@ -57,15 +62,27 @@
 </template>
 
 <script>
+import { Photos } from '@/services'
+
+import SelectInput from '@/components/SelectInput'
+
 export default {
-  props: ['open', 'uploading', 'progress'],
+  props: ['open', 'progress'],
+  components: {
+    SelectInput
+  },
   data: () => ({
     photo: {
       name: '',
       url: '',
-      file: ''
-    }
+      file: '',
+      tag: ''
+    },
+    tags: []
   }),
+  created () {
+    this.getTags()
+  },
   methods: {
     close () {
       this.$emit('close')
@@ -87,6 +104,14 @@ export default {
         this.photo.url = fr.result
         this.photo.file = files[0] // this is an file file that can be sent to server...
       })
+    },
+    getTags () {
+      Photos.getTags((res) => {
+        this.tags = res
+      })
+    },
+    selectTag (v) {
+      this.photo.tag = v
     },
     upload () {
       this.$emit('upload', this.photo)
