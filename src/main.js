@@ -21,6 +21,12 @@ const config = {
 
 firebase.initializeApp(config)
 
+Vue.filter('toUpper', (value) => {
+  if (!value) return ''
+  value = value.toString()
+  return value.toUpperCase()
+})
+
 router.beforeEach((to, from, next) => {
   if (to.matched.some((x) => x.meta.requiresAuth)) {
     if (firebase.auth().currentUser) {

@@ -14,6 +14,9 @@
       </v-btn>
     </div>
   </v-card-actions>
+  <v-card-actions>
+    <tags :items="tags" @selectTag="selectTag"></tags>
+  </v-card-actions>
   <v-card-title class="pa-2">
     <v-container grid-list-xs wrap class="pa-0">
       <v-layout row wrap>
@@ -126,12 +129,14 @@ import { Photos, Users } from '@/services'
 
 import SortingButton from '@/components/SortingButton'
 import UploadDialog from '@/components/UploadDialog'
+import Tags from '@/components/Tags'
 
 export default {
   props: ['items'],
   components: {
     UploadDialog,
-    SortingButton
+    SortingButton,
+    Tags
   },
   data: () => ({
     currentUser: null,
@@ -154,24 +159,30 @@ export default {
     like: false,
     photos: [],
     options: [],
+    tags: [],
+    currentTag: 'all',
     progress: 0,
     uploading: false
   }),
   created () {
     this.reload()
-    this.loadPhotos()
+    this.getPhotos()
   },
   watch: {
     currentUser () {
-      this.loadPhotos()
+      this.getPhotos()
     },
     sorting () {
-      this.loadPhotos()
+      this.getPhotos()
     },
     items () {
-      this.loadPhotos()
+      this.getPhotos()
+    },
+    currentTag () {
+      this.getPhotos()
     },
     photos () {
+      this.getTags()
       this.getOptions()
     }
   },
@@ -186,11 +197,17 @@ export default {
         this.currentUser = user
       })
     },
-    loadPhotos () {
+    getPhotos () {
+      let result = []
       if (this.sorting === 0) {
-        this.photos = this.items
+        result = this.items
       } else {
-        this.photos = _.orderBy(this.items, ['like', '_createdAt'], ['desc', 'desc'])
+        result = _.orderBy(this.items, ['like', '_createdAt'], ['desc', 'desc'])
+      }
+      if (this.currentTag === 'all') {
+        this.photos = result
+      } else {
+        this.photos = _.filter(result, { 'tag': this.currentTag })
       }
     },
     selectPhoto (id) {
@@ -239,6 +256,16 @@ export default {
       Photos.getOptions(id, (res) => {
         this.options = res
       })
+    },
+    getTags () {
+      firebase.database()
+        .ref('tags')
+        .on('value', (snapshot) => {
+          this.tags = snapshot.val()
+        })
+    },
+    selectTag (v) {
+      this.currentTag = v
     },
     upload (value) {
       if (!value.file) return
