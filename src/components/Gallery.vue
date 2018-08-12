@@ -18,7 +18,7 @@
     <v-container grid-list-xs wrap class="pa-0">
       <v-layout row wrap>
         <v-flex
-          v-for="(photo, index) in photos"
+          v-for="(photo, index) in showPhotos[currentPage - 1]"
           :key="index"
           xs12 sm6 md3
         >
@@ -98,7 +98,16 @@
       </v-layout>
     </v-container>
   </v-card-title>
-  
+  <v-card-actions >
+    <v-spacer></v-spacer>
+    <div class="text-xs-center">
+      <v-pagination
+        v-model="currentPage"
+        :length="showPhotos.length"
+        :total-visible="5"
+      ></v-pagination>
+    </div>
+  </v-card-actions>
   <upload-dialog
     :open="uploadDialog"
     :uploading="uploading"
@@ -126,6 +135,8 @@ export default {
   },
   data: () => ({
     currentUser: null,
+    currentPage: 1,
+    itemsPerPage: 8,
     sorting: 0,
     sortingItems: [
       {
@@ -148,24 +159,25 @@ export default {
   }),
   created () {
     this.reload()
+    this.loadPhotos()
   },
   watch: {
     currentUser () {
-      this.getOptions()
+      this.loadPhotos()
     },
     sorting () {
-      if (this.sorting === 0) {
-        this.photos = this.items
-      } else {
-        this.photos = _.orderBy(this.items, ['like'], ['desc'])
-      }
+      this.loadPhotos()
     },
     items () {
-      if (this.sorting === 0) {
-        this.photos = this.items
-      } else {
-        this.photos = _.orderBy(this.items, ['like'], ['desc'])
-      }
+      this.loadPhotos()
+    },
+    photos () {
+      this.getOptions()
+    }
+  },
+  computed: {
+    showPhotos () {
+      return _.chunk(this.photos, this.itemsPerPage)
     }
   },
   methods: {
@@ -173,6 +185,13 @@ export default {
       firebase.auth().onAuthStateChanged((user) => {
         this.currentUser = user
       })
+    },
+    loadPhotos () {
+      if (this.sorting === 0) {
+        this.photos = this.items
+      } else {
+        this.photos = _.orderBy(this.items, ['like', '_createdAt'], ['desc', 'desc'])
+      }
     },
     selectPhoto (id) {
       this.$router.push(`/photo/${id}`)
