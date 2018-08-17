@@ -16,7 +16,7 @@
   </v-card-actions>
   <v-card-actions>
     <tag
-      :items="tags" @selectTag="selectTag"
+      :items="tags" @selectItem="selectTag"
       class="hidden-sm-and-down"
     ></tag>
   </v-card-actions>
