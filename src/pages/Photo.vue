@@ -12,17 +12,17 @@
         <v-card-title>
         </v-card-title>
         <v-card-actions>
-          <v-btn
+          <!-- <v-btn
             v-if="currentUser"
             color="success"
             @click="download"
-          >download</v-btn>
+          >download</v-btn> -->
           <v-btn
             :href="photo.url"
             target="_blank"
-            flat
+            outline
             color="info"  
-          >Open</v-btn>
+          >View</v-btn>
           <v-spacer></v-spacer>
           <v-btn icon
             color="white"
